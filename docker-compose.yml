@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  teslapowerplanttracker:
+    build: .
+    ports:
+      - "5002:5000"
+    volumes:
+      - teslapowerplanttracker:/data
+    restart: unless-stopped
+    environment:
+      APP_USERNAME: ${APP_USERNAME}
+      APP_PASSWORD: ${APP_PASSWORD}
+      APP_SECRET: ${APP_SECRET}
+      DATABASE: instance/tesla_tracker.db
+      LATITUDE: ${LATITUDE}
+      LONGITUDE: ${LONGITUDE}
+      SYSTEM_KW: ${SYSTEM_KW}
+      PERFORMANCE_RATIO: ${PERFORMANCE_RATIO}
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
+
+volumes:
+  teslapowerplanttracker:
+    external: true
