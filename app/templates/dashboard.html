@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2>Solar Dashboard</h2>
+
+<div class="dashboard-summary" style="margin-bottom: 2rem;">
+    <h3>System Summary</h3>
+    <ul style="list-style: none; padding-left: 0;">
+        <li><strong>Total Usage:</strong> {{ total_usage }} kWh</li>
+        <li><strong>Total Generation:</strong> {{ total_generation }} kWh</li>
+        <li><strong>Overall Efficiency:</strong> {{ overall_efficiency }}%</li>
+        <li><strong>System Health (Lifetime):</strong> {{ system_health }}%</li>
+
+    </ul>
+</div>
+
+<canvas id="usageChart" height="100"></canvas>
+<canvas id="effChart" height="80" style="margin-top:2rem;"></canvas>
+<canvas id="genCompareChart" height="80" style="margin-top:2rem;"></canvas>
+<canvas id="healthChart" height="80" style="margin-top: 2rem;"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const data = {{ chart_data|tojson }};
+const labels = data.map(d => d.month);
+const usage = data.map(d => d.usage);
+const gen = data.map(d => d.generation);
+const eff = data.map(d => d.efficiency);
+const netCost = data.map(d => d.net_cost);
+const potential = data.map(d => d.potential);
+const gap = data.map(d =>
+    d.potential > 0 ? ((1 - d.generation / d.potential) * 100).toFixed(2) : 0
+);
+const health = data.map(d =>
+  d.potential > 0 ? ((d.generation / d.potential) * 100).toFixed(2) : 0
+);
+
+
+new Chart(document.getElementById('usageChart'), {
+    type: 'bar',
+    data: {
+        labels,
+        datasets: [
+            {
+                label: 'Usage (kWh)',
+                data: usage,
+                backgroundColor: '#e74c3c'
+            },
+            {
+                label: 'Generation (kWh)',
+                data: gen,
+                backgroundColor: '#2ecc71'
+            },
+            {
+                label: 'Net Cost ($)',
+                data: netCost,
+                type: 'line',
+                yAxisID: 'y2',
+                borderColor: '#34495e',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 3
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Monthly Usage vs Generation & Net Cost'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Energy (kWh)'
+                }
+            },
+            y2: {
+                beginAtZero: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: 'Net Cost ($)'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            }
+        }
+    }
+});
+
+new Chart(document.getElementById('effChart'), {
+    type: 'line',
+    data: {
+        labels,
+        datasets: [
+            {
+                label: 'Efficiency (%)',
+                data: eff,
+                borderColor: '#3498db',
+                tension: 0.3,
+                pointRadius: 3
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Solar Efficiency Over Time'
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                suggestedMax: 130
+            }
+        }
+    }
+});
+
+new Chart(document.getElementById('genCompareChart'), {
+    type: 'bar',
+    data: {
+        labels,
+        datasets: [
+            {
+                label: 'Actual Generation (kWh)',
+                data: gen,
+                backgroundColor: '#2ecc71'
+            },
+            {
+                label: 'Potential Generation (kWh)',
+                data: potential,
+                backgroundColor: '#3498db'
+            },
+            {
+                label: '% Below Potential',
+                data: gap,
+                type: 'line',
+                yAxisID: 'y2',
+                borderColor: '#e67e22',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 3
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Actual vs Potential Solar Generation'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        if (context.dataset.label === '% Below Potential') {
+                            return `${context.parsed.y}% loss`;
+                        }
+                        return `${context.dataset.label}: ${context.parsed.y} kWh`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Energy (kWh)'
+                }
+            },
+            y2: {
+                beginAtZero: true,
+                position: 'right',
+                title: {
+                    display: true,
+                    text: '% Below Potential'
+                },
+                grid: {
+                    drawOnChartArea: false
+                }
+            }
+        }
+    }
+});
+new Chart(document.getElementById('healthChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [{
+      label: 'System Health (%)',
+      data: health,
+      borderColor: '#16a085',
+      tension: 0.3,
+      pointRadius: 3,
+      fill: false
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'System Health Over Time'
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        suggestedMax: 100,
+        title: {
+          display: true,
+          text: 'Health (%)'
+        }
+      }
+    }
+  }
+});
+
+</script>
+{% endblock %}

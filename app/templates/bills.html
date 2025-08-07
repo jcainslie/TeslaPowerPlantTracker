@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}Uploaded Bills{% endblock %}
+
+{% block content %}
+<h2>Uploaded Bills</h2>
+
+<div class="bill-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+
+  <!-- LEFT: Upload form and uploaded table -->
+  <div class="bill-left">
+    <h3>Upload New Bill</h3>
+    <form id="uploadForm" class="upload-form" style="display: grid; gap: 0.8rem;">
+      <input type="file" id="fileInput" name="file" accept="application/pdf" required>
+
+      <label>Bill Date:
+        <input type="date" name="bill_date" required>
+      </label>
+
+      <label>Base Usage (kWh):
+        <input type="number" step="0.001" name="base_kwh" id="base_kwh" required>
+      </label>
+
+      <label>Peak Usage (kWh):
+        <input type="number" step="0.001" name="peak_kwh" id="peak_kwh" required>
+      </label>
+
+        <input type="hidden" name="usage_kwh" id="usage_kwh">
+
+      <label>Usage Cost ($):
+        <input type="number" step="0.01" name="usage_cost" required>
+      </label>
+
+      <label>Generation (kWh):
+        <input type="number" step="0.001" name="generation_kwh" required>
+      </label>
+
+      <label>Generation Credit ($):
+        <input type="number" step="0.01" name="generation_credit" required>
+      </label>
+
+      <button type="submit">Upload</button>
+
+      <progress id="uploadProgress" value="0" max="100" style="display: none; width: 100%;"></progress>
+      <div id="uploadStatus"></div>
+      <div id="processingSpinner" style="display: none;">Processing...</div>
+    </form>
+
+    <h3 style="margin-top: 2rem;">Uploaded Bills</h3>
+    {% if bills %}
+    <table class="bill-table">
+      <thead>
+        <tr>
+          <th>Bill Date</th>
+          <th>Filename</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bill in bills %}
+        <tr>
+          <td>{{ bill.bill_date }}</td>
+          <td>{{ bill.filename }}</td>
+          <td>
+            <button type="button" onclick="viewPDF('{{ url_for('bills.serve_file', filename=bill.filename) }}')">View</button>
+            <form action="{{ url_for('bills.delete_bill', bill_id=bill.id) }}" method="post" style="display:inline;">
+              <button type="submit" onclick="return confirm('Delete this bill?')">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No bills uploaded yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- RIGHT: PDF Preview -->
+  <div class="bill-preview">
+    <h3>Bill Preview</h3>
+    <iframe id="pdfViewer" src="" width="100%" height="800px" style="border: 1px solid #ccc;"></iframe>
+  </div>
+</div>
+
+<script>
+  function viewPDF(url) {
+    document.getElementById("pdfViewer").src = url;
+  }
+
+  document.getElementById('uploadForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const file = document.getElementById('fileInput').files[0];
+      if (!file) return;
+
+      // ✅ Move usage calculation BEFORE FormData is created
+      const base = parseFloat(document.getElementById('base_kwh').value) || 0;
+      const peak = parseFloat(document.getElementById('peak_kwh').value) || 0;
+      document.getElementById('usage_kwh').value = (base + peak).toFixed(3);
+
+      const form = document.getElementById('uploadForm');
+      const formData = new FormData(form);
+      formData.append('file', file);  // already in form, but safe to append again
+
+      const xhr = new XMLHttpRequest();
+      const progressBar = document.getElementById('uploadProgress');
+      const status = document.getElementById('uploadStatus');
+      const spinner = document.getElementById('processingSpinner');
+
+      progressBar.style.display = 'block';
+      progressBar.value = 0;
+      status.textContent = 'Uploading...';
+      spinner.style.display = 'none';
+
+      xhr.upload.addEventListener('progress', function (e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.value = percent;
+        }
+      });
+
+      xhr.onload = function () {
+        progressBar.style.display = 'none';
+        spinner.style.display = 'inline';
+        if (xhr.status === 200) {
+          status.textContent = '✅ Upload complete!';
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          status.textContent = '❌ Upload failed';
+        }
+      };
+
+      xhr.onerror = function () {
+        status.textContent = '❌ Upload error';
+      };
+
+      xhr.open('POST', '{{ url_for("bills.upload_bill_ajax") }}');
+      xhr.send(formData);
+    });
+
+</script>
+{% endblock %}

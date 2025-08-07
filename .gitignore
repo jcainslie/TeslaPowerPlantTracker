@@ -1,0 +1,36 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# IDE files
+.idea/
+*.iml
+
+# Flask & SQLite
+instance/
+*.db
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# Python environment
+.env
+*.env
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+/uploads/*
+!/uploads/.gitkeep
