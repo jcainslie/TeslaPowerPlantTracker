@@ -32,4 +32,6 @@ def create_app():
     app.register_blueprint(bills_bp)
     app.register_blueprint(auth_bp)
 
+    print("Starting")
+
     return app
