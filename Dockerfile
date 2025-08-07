@@ -6,11 +6,11 @@ COPY . /app
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Ensure folders exist
-RUN mkdir -p /app/instance /app/uploads
+# Ensure subfolders exist inside the mounted volume path
+RUN mkdir -p /data/instance /data/uploads
 
-# Declare volumes for persistence
-VOLUME ["/app/instance", "/app/uploads"]
+# Mount single volume at /data
+VOLUME ["/data"]
 
 EXPOSE 5000
 
