@@ -34,3 +34,4 @@ ehthumbs.db
 
 /uploads/*
 !/uploads/.gitkeep
+/scripts/backfill_solar_data.py
