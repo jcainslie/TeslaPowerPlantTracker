@@ -7,6 +7,8 @@ load_dotenv()  # Load .env variables
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
 
+    print("Starting")
+
     app.config.from_mapping(
         SECRET_KEY=os.getenv("FLASK_SECRET_KEY", "dev"),
         DATABASE=os.getenv("DATABASE", os.path.join(app.instance_path, 'tesla_tracker.db')),
@@ -16,7 +18,7 @@ def create_app():
         APP_USERNAME = os.getenv("APP_USERNAME"),
         APP_PASSWORD = os.getenv("APP_PASSWORD"),
         SYSTEM_KW=float(os.getenv('SYSTEM_KW', 6.2)),
-        PERFORMANCE_RATIO = float(os.getenv('PERFORMANCE_RATIO', 0.80))
+        PERFORMANCE_RATIO = float(os.getenv('PERFORMANCE_RATIO', 0.60))
     )
 
     # Ensure instance and upload folders exist
@@ -32,6 +34,6 @@ def create_app():
     app.register_blueprint(bills_bp)
     app.register_blueprint(auth_bp)
 
-    print("Starting")
+
 
     return app
