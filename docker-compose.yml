@@ -11,13 +11,15 @@ services:
     environment:
       APP_USERNAME: ${APP_USERNAME}
       APP_PASSWORD: ${APP_PASSWORD}
-      APP_SECRET: ${APP_SECRET}
       DATABASE: instance/tesla_tracker.db
       LATITUDE: ${LATITUDE}
       LONGITUDE: ${LONGITUDE}
       SYSTEM_KW: ${SYSTEM_KW}
       PERFORMANCE_RATIO: ${PERFORMANCE_RATIO}
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
+      UPLOAD_FOLDER: ${uploads}
+
+
 
 volumes:
   teslapowerplanttracker:

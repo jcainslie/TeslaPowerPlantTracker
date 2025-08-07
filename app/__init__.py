@@ -9,7 +9,7 @@ def create_app():
 
     app.config.from_mapping(
         SECRET_KEY=os.getenv("FLASK_SECRET_KEY", "dev"),
-        DATABASE=os.getenv("DATABASE_PATH", os.path.join(app.instance_path, 'tesla_tracker.db')),
+        DATABASE=os.getenv("DATABASE", os.path.join(app.instance_path, 'tesla_tracker.db')),
         UPLOAD_FOLDER=os.getenv("UPLOAD_FOLDER", "uploads"),
         LATITUDE=float(os.getenv("LATITUDE")),
         LONGITUDE = float(os.getenv("LONGITUDE")),
