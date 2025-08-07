@@ -7,7 +7,7 @@ load_dotenv()  # Load .env variables
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
 
-    print("Starting",flush=True)
+
 
     app.config.from_mapping(
         SECRET_KEY=os.getenv("FLASK_SECRET_KEY", "dev"),
@@ -34,6 +34,6 @@ def create_app():
     app.register_blueprint(bills_bp)
     app.register_blueprint(auth_bp)
 
-
+    print("Starting", flush=True)
 
     return app
