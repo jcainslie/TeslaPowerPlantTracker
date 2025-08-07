@@ -4,7 +4,7 @@ services:
   teslapowerplanttracker:
     build: .
     ports:
-      - "5002:5000"
+      - "5005:5000"
     volumes:
       - teslapowerplanttracker:/data
     restart: unless-stopped
